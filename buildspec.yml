@@ -1,0 +1,44 @@
+version: 0.2
+
+env:
+  variables:
+    NODE_ENV: production # Sets the environment to production
+
+  secrets-manager:
+    MONGO_URI: "your_secrets_manager_arn:MONGO_URI" # Use Secrets Manager ARN if storing environment variables in Secrets Manager
+    JWT_SECRET: "your_secrets_manager_arn:JWT_SECRET"
+
+phases:
+  install:
+    runtime-versions:
+      nodejs: 20 # Specify Node.js version
+    commands:
+      - echo "Installing Node.js dependencies"
+      - npm install # Installs the necessary dependencies from package.json
+      - npm install -g pm2 # Installs PM2 globally to manage app processes
+
+  pre_build:
+    commands:
+      - echo "Running pre-build steps"
+      - echo "Linting code"
+      - npm run lint # Run any linting commands or code checks, if configured
+
+  build:
+    commands:
+      - echo "Building and testing the application"
+      - npm run build # Add build commands if needed, for example, compiling assets
+      - echo "Running tests"
+      - npm test # Run your test suite, if available
+
+  post_build:
+    commands:
+      - echo "Build completed successfully"
+
+artifacts:
+  files:
+    - '**/*' # Include all files for deployment
+  discard-paths: yes # Flatten the directory structure
+
+cache:
+  paths:
+    - 'node_modules/**/*' # Cache node_modules to speed up subsequent builds
