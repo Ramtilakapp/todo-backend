@@ -1,0 +1,31 @@
+version: 0.0
+os: linux
+files:
+  # Copy the application files from the source to the destination on the EC2 instance
+  - source: / # All files from your GitHub repository
+    destination: /home/ubuntu/todo-backend # Target location on the EC2 instance
+
+hooks:
+  # BeforeInstall: Stop the current app (Blue environment) before deploying the new version (Green environment)
+  BeforeInstall:
+    - location: scripts/stop_old_app.sh
+      timeout: 300
+      runas: ubuntu
+
+  # AfterInstall: Install dependencies after the files are copied over
+  AfterInstall:
+    - location: scripts/install_dependencies.sh
+      timeout: 300
+      runas: ubuntu
+
+  # ApplicationStart: Start the new application (Green environment)
+  ApplicationStart:
+    - location: scripts/start_new_app.sh
+      timeout: 300
+      runas: ubuntu
+
+  # ValidateService: Perform a health check to ensure the new app is running correctly
+  ValidateService:
+    - location: scripts/validate_health.sh
+      timeout: 300
+      runas: ubuntu
